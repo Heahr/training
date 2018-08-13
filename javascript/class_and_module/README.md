@@ -332,7 +332,7 @@ i는 앞에 있는 바깥 매게변수들을 다 처리하고 log안에 있는 n
 아마 this값 이기 때문에 자신의 객체로 반응 하기위해서 context가 앞에 있다고 생각됨.
 ```
 Object.prototype에도 메서드를 추가할수 있지만, 그러면 모든 객체에서 메서드를 사용할 수 있으나 ECMAScript 5 이전 버전에서는 이러한 추가 메서드가 열거되지 않게 할 방법이 없기 때문에 for/in 루트에서 열거될 것이다.
-호스트 환경(웹브라우저 같은)에서 정의된 클래스를 이러한 방식으로 확장할 수 있는지는 호스트 환경의 구현체마다 다르다. 예를 들면 많은 브라우저에서는 HTMLElement.prototype에 메서드를 추가할 수 있고, 현재 문서의 HTML 태그를 표현하는 객체들은 이렇게 추가된 메서드를 상송할 것이다. 그러나 이는 마이크로소프트 인터넷 익스플로러의 현재 버전에서는 작동하지 않는데, 이 때문에 클라이언트 측 프로그래밍에서 이러한 기법은 사용은 몹시 제한 받는다.
+호스트 환경(웹브라우저 같은)에서 정의된 클래스를 이러한 방식으로 확장할 수 있는지는 호스트 환경의 구현체마다 다르다. 예를 들면 많은 브라우저에서는 HTMLElement.prototype에 메서드를 추가할 수 있고, 현재 문서의 HTML 태그를 표현하는 객체들은 이렇게 추가된 메서드를 상속할 것이다. 그러나 이는 마이크로소프트 인터넷 익스플로러의 현재 버전에서는 작동하지 않는데, 이 때문에 클라이언트 측 프로그래밍에서 이러한 기법은 사용은 몹시 제한 받는다.
 
 ###클래스와 자료형
 자바스크립트에는 null, undefined, 불리언, 숫자, 문자열, 함수, 객체 등의 몇 안 되는 자료형이 있다. typeof 연산자를 사용하면 이러한 형식을 구분할 수 있다. 그러나 일반적으로 클래스는 독자적인 자료형으로 다루는 것이 편하고, 클래스를 기준으로 객체를 구분하는 것이 편리하다. 자바스크립트 핵심부의 내장 객체(그리고 일반적인 클라이언트 측 자바스크립트의 호스트 객체)들은 classof()함수와 같은 코드를 사용하여, class속성을 기준으로 구별할 수 있다. 하지만 이 장에서 다룬 기법을 사용하여서 클래스를 정의하면, 인스턴스 객체의 "class" 속성은 언제나 "Object"이다. 따라서 classof() 함수는 이런 상황에는 도움이 되지 않는다.
@@ -543,10 +543,10 @@ String(Coin.Dime) + ":" + Coin.Dime										->"Dime: 10": 문자열로 강제 �
 //이 함수는 새 열거형을 생성한다. 인자 객체는 열거형의 각 인스턴스에 대한 이름과 값을 지정한다.
 //이 함수의 반환 값은 새 클래스를 구별하는 생성자 함수다. 그러나 생성자를 직접 사용하면 예외가 발생한다는 것을 유념하라.
 //열거형의 새 인스턴스를 생성하는 데 직접 생성자 함수를 사용할 수 없다. 반환된 생성자의 프로퍼티에는 생성자 그 자체를 가리키는 이름과 값 배열, 그리고 열거 함수 foreach()가 있다.
-function enumeration(namesTovalues) {
+function enumeration(namesToValues) {
 	//이것은 더미 생성자 함수이고, 이 함수가 반환 값이 된다.
     var enumeration = function() {
-    	throw "열거형은 인스턴스화 할 수 없습니다.";
+    	throw "열거형은 인스턴스화 할 수 없습니다.";								->var e = new enumeration();
     };
     
     //열거 값은 이 proto 객체를 상속한다.
@@ -560,13 +560,13 @@ function enumeration(namesTovalues) {
     for(name in namesToValues) {								->각 값들을 순회환다.
     	var e = inherit(proto);									->해당 값을 나타내는 객체를 만든다.
         e.name = name;											->이름을 부여하고
-        e.value = nameToValues[name];							->값을 설정한다.
+        e.value = namesToValues[name];							->값을 설정한다.
         enumeration[name] = e;									->생성자의 프로퍼티에 이 객체를 지정하고 
         enumeration.values.push(e);								->값 배열에 저장한다.
     }
     
     //인스턴스를 순회하는 클래스 메서드
-    enumeration.foreach = function(f,c) {
+    enumeration.foreach = function(f,c) {				->c에 같은값을 꺼내준다?
     	for(var i = 0; i < this.values.length; i++) f.call(c.this.values[i]);
     };
     
@@ -815,7 +815,7 @@ function Range(from, to){
 Range.prototype = {
 	constructor: Range,
     includes: function(x) { return this.from() <= x && x <= this.to(); },
-    foreach: function(x) {
+    foreach: function(f) {
     	for(var x = Math.ceil(this.from()), max = this.to(); x <= max; x++) f(x);
     },
     toString: function() { return "(" + this.from() + "..." + this.to() + ")"; }
@@ -853,7 +853,7 @@ Complex.polar = function(r, theta) {
 ```
 Set.fromArray = function(a) {
 	s = new Set();											-> 빈 세트를 만든다.
-    s.add.spply(s, a);										-> 배열 a의 요소를 add 메서드에 전달한다.
+    s.add.apply(s, a);										-> 배열 a의 요소를 add 메서드에 전달한다.
     return s;												-> 세트를 반환한다.
 }
 ```
@@ -862,7 +862,7 @@ Set.fromArray = function(a) {
 //Set 클래스의 보조 생성자.
 function SetFromArray(a){
 	//인자 a의 요소를 개별 인자로 전달하여, Set()을 함수로 호출하여 새 객체를 초기화 된다.
-    Set.apply(this, a);
+    Set.apply(this, a);												->set에있던 함수들, value나 여러가지 등등
 }
 
 //프로토타입을 설정함으로써 SetFromArray가 Set의 인스턴스를 생성하게 한다.
@@ -874,7 +874,7 @@ s instanceof Set											-> true
 ECMAScript 5에서는 함수의 bind() 메서드를 사용하여 이러한 종류의 보조 생성자를 만들 수 있다.
 
 ###서브 클래스
-객체 지향 프로그래밍에서 클래스 B는 다른 클래스 A를 확장(extend)하거나 클래스 A의 하위 클래스가 될 수 있다. 이런 경우, 클래스 A를 슈퍼클래스라 하고 클래스 B를 서브클래스 라고 한다. 클래스 B의 인스턴스는 클래스 A의 모든 인스턴스 메서드를 상속한다. 클래스 B는 자신만의 인스턴스 메서드를 가질 수 있고, 그중 몇 가지는 클래스 A로부터 상속받은 메서드를 똑같은 이름으로 재정의 할 수도 있다.
+객체 지향 프로그래밍에서 클래스 B는 다른 클래스 A를 확장(extend)하거나 클래스 A의 하위 클래스가 될 수 있다. 이런 경우, 클래스 A를 슈퍼클래스라 하고 클래스 B를 서브클래스 라고 한다. 클래스 B의 인스턴스는 클래스 A의 모든 인스턴스 메서드를 상속한다. 클래스 B는 자신만의 인스턴스 메서드를 가질 수 있고, 그 중 몇 가지는 클래스 A로부터 상속받은 메서드를 똑같은 이름으로 재정의 할 수도 있다.
 클래스 B의 메서드가 클래스 A의 메서드를 재정의했을 때, 클래스 B의 재정의된 메서드에서 클래스 A의 원래 메서드를 호출할 수가 있는데, 이는 메서드 체이닝이라고 한다. 서브 클래스는 또한 자신의 서브클래스를 가질 수 있다.
 클래스 계층 구조를 사용할 때는 추상클래스를 정의하는 것이 유용한 경우도 있다. 추상 클래스는 실제로는 구현되지 않은 추상 메서드가 하나 이상있는 클래스다. 이 추상 메서드의 실제 구현은 추상 클래스를 상속한 서브클래스가 담당한다.
 자바스크립트에서 서브클래스를 만드는 핵심 프로토타입 객체를 적절하게 초기화하는 것이다. 만약 클래스 B가 클래스 A를 확장한다면 B.prototype은 반드시 A.prototype을 상속해야 한다. 그래야, 클래스 B의 인스턴스가 B.prototype을 상속하고 차례로 A.prototype을 상속하게 된다. 이번 절은 서브클래스와 관련하여 앞에서 언급한 각 용어를 다루고, 또한 서브클래스의 대안으로 조합에 대해서도 다뤄본다.
@@ -1010,7 +1010,7 @@ NonNullSet = (function() {
         });
 }());
 ```
-강조하건대, 이런 형태의 클래스 팩터리를 구현할 수 있는 것은 자바스크립트의 동적인 특성 때문이다. 자바나 C++같은 언어에는 클래스 팩터리와 같은 강력하고 유용한 기능이 없다.
+★★★ 강조하건대, 이런 형태의 클래스 팩터리를 구현할 수 있는 것은 자바스크립트의 동적인 특성 때문이다. 자바나 C++같은 언어에는 클래스 팩터리와 같은 강력하고 유용한 기능이 없다.
 #####3.조합 대 서브클래스
 지금까지 특정 조건에 맞는 원소만 허용하는 집합을 정의하기 위해 특정 필터 함수를 사용하여 집합 원소의 자격을 제한하는 서브클래스를 만들었다. 이 경우, 슈퍼클래스는 하나이더라도 **필터의 종류가 달라지면 새로운 클래스를 생성**해야 한다. 그러나 좀 더 나은 방법이 있다. 객체 지향 설계에서 잘 알려진 원칙으로, '상속보다는 조합을 선호하라' 라는 것이다. 조합을 사용하면, 어떤 집합 객체를 감싸는 새로운 집합 객체를 만들어, 조건에 맞지 않는 객체에 대한 삽입 요청을 거른 뒤에 안쪽 집합 객체에 전달함으로써 목적을 달성할 수 있다.
 ```
@@ -1057,6 +1057,17 @@ var t = new FilteredSet(s, { function(x) { return !(x instanceof Set); }};)
 전통적인 객체 지향 언어에서와 마찬가지로 자바스크립트에서의 해법 또한 구현과 인터페이스를 분리하는 것이다. toString() 같은 보조 메서드는 구현하지만 foreach()같은 핵심 메서드는 구현하지 않은 abstractSet 클래스를 정의한다고 가정해보자. 이제 Set, SingletonSet, FilteredSet등의 집합 구현체는 모두 AbstractSet의 서브클래스가 될 수 있다. FilteredSet과 SingletonSet은 더는 자신들과 관련이 없는 슈퍼클래스 구현체를 상속하지 않는다.
 다음 예제는 한 단계 더 나아가서 추상 집합 클래스의 계층 구자를 정의한다. AbstractSet에는 오직 하나의 추상 메서드인 contains()만이 정의되어 있다. Set이 되려는 모든 클래스는 적어도 이 contains() 메서드는 정의해야 한다. AbstractSet을 상속한 AbstractEnumerableSet에는 추상 메서드 size()와 foreach()가 추가되어 있고, 그 메서드들을 이용하는 구체 메서드들(toString(), toArray(), equals() 등) 도 정의되어 있다. AbstractEnumerableSet은 읽기전용 집합이어서 add() 메서드와 remove() 메서드는 정의되어 있지 않다.SingletonSet은 구체적인 서브클래스 AbstractWritableSet은 추상 메서드 add()와 remove()를 정의하고, 그 메서드 위에서 구현된 union()과 intersection() 같은 구체 메서드도 정의하고 있다. AbstractWritableSet은 Set과 FilteredSet 클래스에 적합한 슈퍼클래스다. 이 예제에서는 AbstractWritableSet을 상속하여 Set과 FilteredSet을 구현하는 것은 생략하였지만, 대신 ArraySet이라는 새로운 구체 클래스를 포함했다.
 서브클래스를 만들 때 Function.prototype.exteds를 사용한 것을 주목하자
+
+```
+추가적인 것.
+추상 클래스 분류 : 동물 <- 고양이과	<-사자
+									   <-고양이
+                                       <-호랑이
+					    <-개과		 <-늑대
+                        		  	 <-개
+                        				(일반 클래스( 구현 클래스 ))
+추상 클래스(동물)은 객체를 가질수 없는데, 객체는 상태와 행동을 가진것 이며, 추상이란 덜 구체화 된 것이다. 그래서 객체는 상태와 행동을 갖지 못했다는 의미로 볼 수 있다.
+```
 ```
 //모든 추상 메서드에서 편의상 사용하는 메서드.
 function abstractmethod() { throw new Error("추상 메서드를 호출하였습니다."); }

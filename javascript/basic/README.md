@@ -13,7 +13,8 @@ ECMAScript3 표준을 따르는 자바스크립트 구현체는 Unicode 2.1 이�
 자바스크립트는 대소문자를 구분하는 언어이다.
 online, Online, OnLine, ONLINE은 모두 각기 다른 변수 이름이다.
 (HRML은 대소문자를 구별하지 않는다. XHTML은 대소문자를 구별한다.)
-->HTML의 onclick 이벤트 처리기 속성은 종종 onClick으로 쓰곤 하지만 자바스크립트 코드로는 onclick으로 써야한다.
+
+>HTML의 onclick 이벤트 처리기 속성은 종종 onClick으로 쓰곤 하지만 자바스크립트 코드로는 onclick으로 써야한다.
 
 자바스크립트는 프로그램 코드 내의 토큰들 사이에 있는 공백들을 무시한다. 대부분의 경우, 줄바꿈 문자도 무시한다.
 
